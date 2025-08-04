@@ -7,35 +7,28 @@ interface HexagonProps extends React.ComponentProps<'button'> {
   isCenter?: boolean;
 }
 
+// Hexagon component using SVG for crisp shapes
 const Hexagon = ({ isCenter = false, className, children, ...props }: HexagonProps) => (
   <button
     className={cn(
-      "absolute transform -translate-x-1/2 -translate-y-1/2 transition-transform duration-200 ease-in-out active:scale-90",
+      "absolute flex items-center justify-center font-bold text-3xl transition-transform duration-200 ease-in-out active:scale-90",
+       isCenter ? 'text-primary-foreground' : 'text-foreground',
       className
     )}
-    style={{ width: '30%', height: '30%' }}
     {...props}
   >
-    <svg viewBox="0 0 100 115.47" className="w-full h-full">
+    <svg 
+      viewBox="0 0 100 115.47" 
+      className="absolute w-full h-full drop-shadow-md"
+    >
       <polygon
         points="50,0 100,28.87 100,86.6 50,115.47 0,86.6 0,28.87"
         className={cn(
-          isCenter ? 'fill-primary stroke-primary-foreground' : 'fill-muted stroke-border',
-          'stroke-2'
+          isCenter ? 'fill-primary' : 'fill-muted'
         )}
       />
-      <text
-        x="50"
-        y="65"
-        textAnchor="middle"
-        className={cn(
-          'text-4xl font-bold',
-          isCenter ? 'fill-primary-foreground' : 'fill-foreground'
-        )}
-      >
-        {children}
-      </text>
     </svg>
+    <span className="z-10">{children}</span>
   </button>
 );
 
@@ -47,25 +40,61 @@ interface HexGridProps {
 }
 
 const HexGrid: React.FC<HexGridProps> = ({ centerLetter, outerLetters, onKeyPress }) => {
+  // Define hexagon dimensions and gap
+  const hexWidth = 80;
+  const hexHeight = 92; // height is approx width * sqrt(3) / 2 * 2 -> width * sqrt(3)
+  const gap = 8;
+
+  const hexHorizDist = hexWidth + gap;
+  const hexVertDist = (hexHeight * 3) / 4 + gap;
+
+  // Positions for the outer hexagons relative to the container's center
   const hexPositions = [
-    { top: '25%', left: '50%' }, // top
-    { top: '37.5%', left: '75%' }, // top-right
-    { top: '62.5%', left: '75%' }, // bottom-right
-    { top: '75%', left: '50%' }, // bottom
-    { top: '62.5%', left: '25%' }, // bottom-left
-    { top: '37.5%', left: '25%' }, // top-left
+    { top: `calc(50% - ${hexVertDist}px - ${hexHeight / 2}px)`, left: `50%` }, // top-center
+    { top: `calc(50% - ${hexVertDist / 2}px - ${hexHeight / 2}px)`, left: `calc(50% + ${hexHorizDist / 2}px)` }, // top-right
+    { top: `calc(50% + ${hexVertDist / 2}px - ${hexHeight / 2}px)`, left: `calc(50% + ${hexHorizDist / 2}px)` }, // bottom-right
+    { top: `calc(50% + ${hexVertDist}px - ${hexHeight / 2}px)`, left: '50%' }, // bottom-center
+    { top: `calc(50% + ${hexVertDist / 2}px - ${hexHeight / 2}px)`, left: `calc(50% - ${hexHorizDist / 2}px)` }, // bottom-left
+    { top: `calc(50% - ${hexVertDist / 2}px - ${hexHeight / 2}px)`, left: `calc(50% - ${hexHorizDist / 2}px)` }, // top-left
   ];
 
+  const containerSize = hexHeight * 2 + hexVertDist;
+
   return (
-    <div className="relative w-64 h-64 md:w-72 md:h-72 mx-auto">
-      <Hexagon isCenter style={{ top: '50%', left: '50%' }} onClick={() => onKeyPress(centerLetter)}>
+    <div 
+      className="relative mx-auto"
+      style={{
+        width: `${containerSize}px`,
+        height: `${containerSize}px`,
+      }}
+    >
+      {/* Center Hexagon */}
+      <Hexagon 
+        isCenter 
+        onClick={() => onKeyPress(centerLetter)}
+        style={{
+          width: `${hexWidth}px`,
+          height: `${hexHeight}px`,
+          top: '50%',
+          left: '50%',
+          transform: 'translate(-50%, -50%)'
+        }}
+      >
         {centerLetter}
       </Hexagon>
+      
+      {/* Outer Hexagons */}
       {outerLetters.map((letter, index) => (
         <Hexagon
           key={letter + index}
-          style={hexPositions[index]}
           onClick={() => onKeyPress(letter)}
+          style={{
+            width: `${hexWidth}px`,
+            height: `${hexHeight}px`,
+            top: hexPositions[index].top,
+            left: hexPositions[index].left,
+            transform: 'translate(-50%, -50%)'
+          }}
         >
           {letter}
         </Hexagon>
