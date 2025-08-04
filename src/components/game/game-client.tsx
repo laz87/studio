@@ -23,7 +23,6 @@ export default function GameClient({ puzzle }: { puzzle: Puzzle }) {
   const [currentInput, setCurrentInput] = useState('');
   const [foundWords, setFoundWords] = useState<string[]>([]);
   const [score, setScore] = useState(0);
-  const [message, setMessage] = useState<{ text: string; type: 'success' | 'error' | 'info' }>({ text: ' ', type: 'info' });
   const [isPending, startTransition] = useTransition();
   const { toast } = useToast();
 
@@ -145,7 +144,7 @@ export default function GameClient({ puzzle }: { puzzle: Puzzle }) {
             </Accordion>
         </div>
 
-        <div className="my-4 min-h-[5rem] flex items-center justify-center">
+        <div className="my-8 min-h-[5rem] flex items-center justify-center">
             <p className="text-4xl font-bold tracking-widest min-h-[3rem] text-center">
                 {currentInput.split('').map((letter, i) => (
                     <span key={i} className="inline-block animate-in fade-in zoom-in-50">
@@ -162,7 +161,7 @@ export default function GameClient({ puzzle }: { puzzle: Puzzle }) {
         onKeyPress={handleKeyPress}
       />
 
-      <div className="mt-6 flex w-full justify-center space-x-2">
+      <div className="mt-8 flex w-full justify-center space-x-2">
         <Button onClick={handleShuffle} variant="outline" className="rounded-full h-12 w-24 font-bold" disabled={isPending}>
           <Shuffle className="mr-2 h-5 w-5" /> Shuffle
         </Button>
