@@ -40,7 +40,8 @@ export default function GameClient({ puzzle }: { puzzle: Puzzle }) {
         setStats(prev => ({...prev, puzzlesPlayed: prev.puzzlesPlayed + 1}));
         localStorage.setItem('played-puzzles', JSON.stringify([...playedPuzzles, puzzle.id]));
     }
-  }, [puzzle.id, setStats]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [puzzle.id]);
 
 
   const rank = useMemo(() => getRank(score), [score]);
@@ -65,7 +66,7 @@ export default function GameClient({ puzzle }: { puzzle: Puzzle }) {
     setCurrentInput(prev => prev.slice(0, -1));
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = useCallback(() => {
     if (currentInput.length === 0 || isPending) return;
 
     const upperInput = currentInput.toUpperCase();
@@ -95,7 +96,7 @@ export default function GameClient({ puzzle }: { puzzle: Puzzle }) {
       }
       setCurrentInput('');
     });
-  };
+  }, [currentInput, isPending, foundWords, toast, centerLetter, allLetters, pangrams, setStats]);
   
    useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
@@ -117,7 +118,7 @@ export default function GameClient({ puzzle }: { puzzle: Puzzle }) {
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [currentInput, isPending, allLetters]);
+  }, [allLetters, handleShuffle, handleSubmit, isPending]);
 
   return (
     <div className="flex h-full flex-col items-center justify-between p-4 mx-auto max-w-sm">
