@@ -7,12 +7,10 @@ interface HexagonProps extends React.ComponentProps<'button'> {
   isCenter?: boolean;
 }
 
-// Hexagon component using SVG for crisp shapes
 const Hexagon = ({ isCenter = false, className, children, ...props }: HexagonProps) => (
   <button
     className={cn(
-      "absolute flex items-center justify-center font-bold text-3xl transition-transform duration-200 ease-in-out active:scale-90",
-       isCenter ? 'text-primary-foreground' : 'text-foreground',
+      "absolute flex items-center justify-center font-bold text-3xl text-white transition-transform duration-200 ease-in-out active:scale-90",
       className
     )}
     {...props}
@@ -23,9 +21,9 @@ const Hexagon = ({ isCenter = false, className, children, ...props }: HexagonPro
     >
       <polygon
         points="50,0 100,28.87 100,86.6 50,115.47 0,86.6 0,28.87"
-        className={cn(
-          isCenter ? 'fill-primary' : 'fill-muted'
-        )}
+        className={cn(isCenter ? 'fill-hex-center' : 'fill-hex-outer')}
+        strokeWidth="4"
+        stroke={isCenter ? 'hsl(46 93% 50%)' : 'hsl(0 0% 23%)'}
       />
     </svg>
     <span className="z-10">{children}</span>
@@ -40,25 +38,37 @@ interface HexGridProps {
 }
 
 const HexGrid: React.FC<HexGridProps> = ({ centerLetter, outerLetters, onKeyPress }) => {
-  // Define hexagon dimensions and gap
   const hexWidth = 80;
-  const hexHeight = 92; // height is approx width * sqrt(3) / 2 * 2 -> width * sqrt(3)
+  const hexHeight = 92.38; // Adjusted for perfect hexagon aspect ratio (width * sqrt(3) / 2 * 2 * aspect_ratio_correction)
   const gap = 8;
 
-  const hexHorizDist = hexWidth + gap;
-  const hexVertDist = (hexHeight * 3) / 4 + gap;
+  // Distances between centers
+  const horizDist = hexWidth * 3/4 + gap;
+  const vertDist = hexHeight / 2 + gap;
 
   // Positions for the outer hexagons relative to the container's center
-  const hexPositions = [
-    { top: `calc(50% - ${hexVertDist}px - ${hexHeight / 2}px)`, left: `50%` }, // top-center
-    { top: `calc(50% - ${hexVertDist / 2}px - ${hexHeight / 2}px)`, left: `calc(50% + ${hexHorizDist / 2}px)` }, // top-right
-    { top: `calc(50% + ${hexVertDist / 2}px - ${hexHeight / 2}px)`, left: `calc(50% + ${hexHorizDist / 2}px)` }, // bottom-right
-    { top: `calc(50% + ${hexVertDist}px - ${hexHeight / 2}px)`, left: '50%' }, // bottom-center
-    { top: `calc(50% + ${hexVertDist / 2}px - ${hexHeight / 2}px)`, left: `calc(50% - ${hexHorizDist / 2}px)` }, // bottom-left
-    { top: `calc(50% - ${hexVertDist / 2}px - ${hexHeight / 2}px)`, left: `calc(50% - ${hexHorizDist / 2}px)` }, // top-left
+   const hexPositions = [
+    { top: `calc(50% - ${vertDist}px)`, left: `calc(50% + ${horizDist}px)` }, // top-right
+    { top: `calc(50% + ${vertDist}px)`, left: `calc(50% + ${horizDist}px)` }, // bottom-right
+    { top: `50%`, left: `calc(50% + ${hexWidth + gap}px)` }, // right (placeholder, not used in 6-around-1)
+    { top: `calc(50% + ${hexHeight/2 + gap}px)`, left: '50%' }, // bottom-center
+    { top: `calc(50% + ${vertDist}px)`, left: `calc(50% - ${horizDist}px)` }, // bottom-left
+    { top: `calc(50% - ${vertDist}px)`, left: `calc(50% - ${horizDist}px)` }, // top-left
+    { top: `calc(50% - ${hexHeight/2 + gap}px)`, left: '50%' }, // top-center
+  ];
+  
+  // A standard 7-hex honeycomb pattern has outer hexes at these specific angular positions
+  const honeycombPositions = [
+      { top: `calc(50% - ${hexHeight/2 + gap}px)`, left: '50%' }, // 0: Top
+      { top: `calc(50% - ${vertDist/2}px)`, left: `calc(50% + ${horizDist}px)` }, // 1: Top-Right
+      { top: `calc(50% + ${vertDist/2}px)`, left: `calc(50% + ${horizDist}px)` }, // 2: Bottom-Right
+      { top: `calc(50% + ${hexHeight/2 + gap}px)`, left: `50%` }, // 3: Bottom
+      { top: `calc(50% + ${vertDist/2}px)`, left: `calc(50% - ${horizDist}px)` }, // 4: Bottom-Left
+      { top: `calc(50% - ${vertDist/2}px)`, left: `calc(50% - ${horizDist}px)` }, // 5: Top-Left
   ];
 
-  const containerSize = hexHeight * 2 + hexVertDist;
+
+  const containerSize = hexHeight * 2 + vertDist * 2;
 
   return (
     <div 
@@ -68,6 +78,11 @@ const HexGrid: React.FC<HexGridProps> = ({ centerLetter, outerLetters, onKeyPres
         height: `${containerSize}px`,
       }}
     >
+      <style jsx>{`
+        .fill-hex-center { fill: hsl(var(--hex-center-bg)); }
+        .fill-hex-outer { fill: hsl(var(--hex-outer-bg)); }
+      `}</style>
+      
       {/* Center Hexagon */}
       <Hexagon 
         isCenter 
@@ -91,8 +106,8 @@ const HexGrid: React.FC<HexGridProps> = ({ centerLetter, outerLetters, onKeyPres
           style={{
             width: `${hexWidth}px`,
             height: `${hexHeight}px`,
-            top: hexPositions[index].top,
-            left: hexPositions[index].left,
+            top: honeycombPositions[index].top,
+            left: honeycombPositions[index].left,
             transform: 'translate(-50%, -50%)'
           }}
         >
