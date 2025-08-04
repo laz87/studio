@@ -7,11 +7,13 @@ interface HexagonProps extends React.ComponentProps<'button'> {
   isCenter?: boolean;
 }
 
-const HexagonPolygon = ({ isCenter = false, ...props }) => (
+const HexagonPolygon = ({ isCenter = false }) => (
   <polygon
-    points="50,0 93.3,25 93.3,75 50,100 6.7,75 6.7,25"
-    className={cn(isCenter ? 'fill-hex-center' : 'fill-hex-outer')}
-    {...props}
+    points="50,1 95,25 95,75 50,99 5,75 5,25"
+    className={cn(
+      'transition-colors duration-200',
+      isCenter ? 'fill-primary' : 'fill-muted-foreground'
+    )}
   />
 );
 
@@ -19,7 +21,7 @@ const Hexagon = ({ isCenter = false, className, children, ...props }: HexagonPro
     <button
         className={cn(
         "absolute flex items-center justify-center font-bold text-3xl transition-transform duration-200 ease-in-out active:scale-90",
-        isCenter ? "text-black" : "text-white",
+        isCenter ? "text-primary-foreground" : "text-background",
         className
         )}
         {...props}
@@ -40,16 +42,20 @@ interface HexGridProps {
 
 const HexGrid: React.FC<HexGridProps> = ({ centerLetter, outerLetters, onKeyPress }) => {
   const containerSize = 250;
-  const hexSize = 80;
-  const centerPos = (containerSize - hexSize) / 2;
+  const hexSize = 84; 
+  const hexWidth = hexSize;
+  const hexHeight = hexSize * 0.866; // approx sqrt(3)/2
+
+  const center_x = (containerSize - hexWidth) / 2;
+  const center_y = (containerSize - hexHeight) / 2;
 
   const positions = [
-    { top: 0, left: centerPos },
-    { top: centerPos - hexSize / 2 + 2, left: centerPos + hexSize * 0.75 - 2},
-    { top: centerPos + hexSize / 2 - 2, left: centerPos + hexSize * 0.75 - 2},
-    { top: centerPos + hexSize - 4, left: centerPos },
-    { top: centerPos + hexSize / 2 - 2, left: centerPos - hexSize * 0.75 + 2},
-    { top: centerPos - hexSize / 2 + 2, left: centerPos - hexSize * 0.75 + 2},
+    { top: center_y - hexHeight * 0.75, left: center_x }, // Top
+    { top: center_y - hexHeight * 0.375, left: center_x + hexWidth * 0.65 }, // Top-right
+    { top: center_y + hexHeight * 0.375, left: center_x + hexWidth * 0.65 }, // Bottom-right
+    { top: center_y + hexHeight * 0.75, left: center_x }, // Bottom
+    { top: center_y + hexHeight * 0.375, left: center_x - hexWidth * 0.65 }, // Bottom-left
+    { top: center_y - hexHeight * 0.375, left: center_x - hexWidth * 0.65 }, // Top-left
   ];
 
   return (
@@ -60,20 +66,15 @@ const HexGrid: React.FC<HexGridProps> = ({ centerLetter, outerLetters, onKeyPres
         height: `${containerSize}px`,
       }}
     >
-       <style jsx>{`
-        .fill-hex-center { fill: hsl(var(--hex-center-bg)); }
-        .fill-hex-outer { fill: hsl(var(--hex-outer-bg)); }
-      `}</style>
-
       {/* Center Hexagon */}
       <Hexagon
         isCenter
         onClick={() => onKeyPress(centerLetter)}
         style={{
-          width: `${hexSize}px`,
-          height: `${hexSize}px`,
-          top: `${centerPos}px`,
-          left: `${centerPos}px`,
+          width: `${hexWidth}px`,
+          height: `${hexHeight}px`,
+          top: `${center_y}px`,
+          left: `${center_x}px`,
         }}
       >
         {centerLetter}
@@ -85,8 +86,8 @@ const HexGrid: React.FC<HexGridProps> = ({ centerLetter, outerLetters, onKeyPres
           key={letter + index}
           onClick={() => onKeyPress(letter)}
           style={{
-            width: `${hexSize}px`,
-            height: `${hexSize}px`,
+            width: `${hexWidth}px`,
+            height: `${hexHeight}px`,
             top: `${positions[index].top}px`,
             left: `${positions[index].left}px`,
           }}
