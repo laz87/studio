@@ -15,6 +15,13 @@
 # Production
 /build
 
+# Vercel
+.vercel
+
+# TypeScript
+*.tsbuildinfo
+next-env.d.ts
+
 # Misc
 .DS_Store
 *.pem
@@ -22,18 +29,24 @@
 # Local .env files
 .env.local
 .env.development.local
-.env.test.local
 .env.production.local
-
-# IDE files
-.idea/
-.vscode/
+.env.test.local
 
 # Log files
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+pnpm-debug.log*
 
-# Genkit
-.genkit/cache/
-.genkit/log/
+# Editor directories and files
+.vscode
+.idea
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# Patch-package
+/patches
+/.patch-replacements
